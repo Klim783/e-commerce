@@ -7,7 +7,7 @@ from app.schemas.users import UserResponse, TokenResponse
 from app.security import hash_password, verify_password, create_access_token
 
 
-def register_user(db:Session, email:str, password:str, full_name:str) -> UserResponse:
+def register(db:Session, email:str, password:str, full_name:str) -> UserResponse:
 	if users_repository.get_user_by_email(db, email):
 		raise HTTPException(status_code = 400, detail="Email already registered")
 	user = users_repository.create_user(db, email, hash_password(password), full_name)
