@@ -31,7 +31,7 @@ class ProductCreateRequest(BaseModel):
 		return v
 
 
-class ProductUpdateResponse(BaseModel):
+class ProductUpdateRequest(BaseModel):
 	name: str|None = Field(..., min_length=1, max_length=255)
 	description:str|None = None
 	price:Decimal |None = None
