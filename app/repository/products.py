@@ -51,7 +51,7 @@ def list_products(
 		return query.order_by(Product.created_at.desc()).offset(offset).limit(limit).all()
 
 
-def create_products(db:Session, **fields) -> Product:
+def create_product(db:Session, **fields) -> Product:
 	product = Product(**fields)
 	db.add(product)
 	db.commit()
