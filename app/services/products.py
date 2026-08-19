@@ -11,6 +11,8 @@ from app.schemas.products import (
 	ProductCreateRequest,
 	ProductUpdateRequest,
 )
+import math
+from app.repository import products as product_repo
 
 
 def create_category(db: Session, name: str, slug: str, parent_id: int | None) -> CategoryResponse:
@@ -94,3 +96,25 @@ def delete_product(db: Session, product_id: int) -> None:
 		)
 
 	products_repository.delete_product(db, product)
+
+
+def search_products(db:Session, params):
+	products, total = products_repository.search_products(
+		db,
+		q = params.q,
+		category_id = params.category_id,
+		min_price = params.min_price,
+		max_price = params.max_price,
+		min_rating = params.min_rating,
+		sort_by = params.sort_by.value,
+		page = params.page,
+		page_size = params.page_size,
+	)
+	total_pages = math.ceil(total/params.page_size) if total else 0
+	return {
+		"items":products,
+		"total":total,
+		"page":params.page,
+		"page_size":params.page_size,
+		"total_pages":total_pages,
+	}
