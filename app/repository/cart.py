@@ -32,7 +32,7 @@ def update_cart_item_quantity(db:Session, item:CartItem, quantity:int) -> CartIt
 	db.refresh(item)
 	return item
 
-def delete_cart(db:Session, item:CartItem)-> None:
+def delete_cart_item(db:Session, item:CartItem)-> None:
 	db.delete(item)
 	db.commit()
 
