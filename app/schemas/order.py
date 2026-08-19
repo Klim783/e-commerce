@@ -23,3 +23,10 @@ class OrderResponse(BaseModel):
 
 	class Config:
 		from_attributes = True
+
+
+class OrderStatusUpdateRequest(BaseModel):
+	status:OrderStatus
+
+class AdminOrderResponse(BaseModel):
+	user_id:int
