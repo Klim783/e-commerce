@@ -20,8 +20,13 @@ def get_review_by_user_and_product(db:Session, user_id:int, product_id:int) -> R
 	stmt = select(Review).where(Review.user_id == user_id, Review.product_id == product_id)
 	return db.execute(stmt).scalar_one_or_none()
 
-def get_reviews_for_product(db:Session, review_id:int) -> Review|None:
-	return db.get(Review, review_id)
+def get_review_by_id(db: Session, review_id: int) -> Review | None:
+    return db.get(Review, review_id)
+
+
+def get_reviews_for_product(db: Session, product_id: int) -> list[Review]:
+    stmt = select(Review).where(Review.product_id == product_id).order_by(Review.created_at.desc())
+    return db.execute(stmt).scalars().all()
 
 def create_review(db:Session, user_id:int, product_id:int, rating:int, comment:str|None) -> Review:
 	review = Review(user_id = user_id, product_id  = product_id, rating = rating, comment = comment)
