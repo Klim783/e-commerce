@@ -32,8 +32,12 @@ def update_cart_item_quantity(db:Session, item:CartItem, quantity:int) -> CartIt
 	db.refresh(item)
 	return item
 
-def delete_cart(db:Session, user_id:int) -> None:
-	items = get_cart_item(db, user_id)
+def delete_cart(db:Session, item:CartItem)-> None:
+	db.delete(item)
+	db.commit()
+
+def clear_cart(db:Session, user_id:int) ->None:
+	items = get_cart_items(db,user_id)
 	for item in items:
 		db.delete(item)
 	db.commit()
