@@ -5,7 +5,7 @@ from app.schemas.products import ProductResponse
 
 class CartItemAddRequest(BaseModel):
 	product_id:int
-	quantity:int
+	quantity: int = Field(gt = 0, default = 1)
 
 class CartItemUpdateRequest(BaseModel):
 	quantity:int = Field(..., ge = 1)
@@ -14,6 +14,7 @@ class CartItemResponse(BaseModel):
 	model_config = {'from_attributes':True}
 	id:int
 	product: ProductResponse
+	unit_price:Decimal
 	quantity: int
 
 	@computed_field
