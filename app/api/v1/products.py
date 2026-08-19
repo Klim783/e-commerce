@@ -8,7 +8,8 @@ from app.dependency import get_db, require_admin
 from app.models import User
 from app.schemas.products import ProductCreateRequest, ProductUpdateRequest, ProductResponse
 from app.services import products as products_service
-
+from app.schemas.products import ProductFilterParams, PaginatedProductsResponse
+from app.services import products as product_service
 router = APIRouter()
 
 
@@ -58,3 +59,10 @@ def delete_product(
 		admin: User = Depends(require_admin),
 ):
 	products_service.delete_product(db, product_id)
+
+@router.get("/search", response_model=PaginatedProductsResponse)
+def search_products(
+	params:ProductFilterParams = Depends(),
+	db:Session = Depends(get_db)
+):
+	return products_service.search_products(db, params)
