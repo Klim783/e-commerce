@@ -41,3 +41,26 @@ def get_order(db:Session, user_id:int, order_id:int):
 
 def list_orders(db:Session, user_id:int):
 	return order_repo.get_user_orders(db, user_id)
+
+
+ALLOWED_TRANSITIONS = {
+	"PENDING" : {"PAID", "CANCELLED"},
+	"PAID": {"SHIPPED","CANCELLED"},
+	"SHIPPED": {"DELIVERED"},
+	"DELIVERED": set(),
+	"CANCELLED" : set(),
+}
+
+def admin_list_orders(db:Session, status:str|None = None):
+	return order_repo.get_all_orders(db, status)
+
+def admin_update_order_status(db:Session, order_id:int, new_status:str):
+	order = order_repo.get_order_by_id(db, order_id)
+	if order is None:
+		raise HTTPException(status.HTTP_404_NOT_FOUND, 'Order not found')
+	if new_status not in ALLOWED_TRANSITIONS.get(order.status, set()):
+		raise HTTPException(
+			status.HTTP_400_BAD_REQUEST,
+			f'Cannot move order from "{order.status}" to "{new_status}"'
+		)
+	return order_repo.update_order_status(db, order, new_status)
