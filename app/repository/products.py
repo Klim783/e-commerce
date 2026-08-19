@@ -2,6 +2,10 @@ from decimal import Decimal
 
 from sqlalchemy.orm import Session
 from app.models import Category, Product
+from sqlalchemy import select, func, and_
+from app.models import Product
+from app.models import Review
+
 
 def get_category_by_slug(db:Session, slug:str) -> Category|None:
 	return db.query(Category).filter(Category.slug == slug).first()
@@ -69,3 +73,58 @@ def update_products(db:Session, product:Product, fields:dict) -> Product:
 def delete_product(db:Session, product:Product) -> None:
 	db.delete(product)
 	db.commit()
+
+
+def search_products(
+	db:Session,
+	q:str|None,
+	category_id:int|None,
+	min_price,
+	max_price,
+	min_rating:float|None,
+	sort_by : str,
+	page:int,
+	page_size:int,
+):
+	rating_subq = (
+		select(
+			Review.product_id,
+			func.avg(Review.rating).label('avg_rating')
+		)
+		.group_by(Review.product_id)
+		.subquery()
+	)
+	stmt = select(Product, rating_subq.c.avg_rating).outerjoin(
+		rating_subq, rating_subq.c.product_id == Product.id
+	)
+
+	conditions = []
+	if q:
+		conditions.append(Product.name.ilike(f'%{q}%'))
+	if category_id is not None:
+		conditions.append(Product.category_id == category_id)
+	if min_price is not None:
+		conditions.append(Product.price >= min_price)
+	if max_price is not None:
+		conditions.append(Product.price <= max_price)
+	if min_rating is not None:
+		conditions.append(rating_subq.c.avg_rating >= min_rating)
+
+	if conditions:
+		stmt = stmt.where(and_(*conditions))
+
+	sort_map = {
+		"price_asc" : Product.price.asc(),
+		"price_desc" : Product.price.desc(),
+		"newest": Product.created_at.desc(),
+		"rating":rating_subq.c.avg_rating.desc().nullslast()
+	}
+
+	stmt = stmt.order_by(sort_map[sort_by])
+	count_stmt = select(func.count()).select_from(stmt.subquery())
+	total = db.execute(count_stmt).scalars_one()
+
+	stmt = stmt.offset((page-1)*page_size).limit(page_size)
+	rows = db.execute(stmt).all()
+	products = [rows[0] for row in rows]
+	return products, total
