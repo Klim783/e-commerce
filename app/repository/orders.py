@@ -32,3 +32,20 @@ def get_order(db:Session, order_id:int, user_id:int) ->Order|None:
 def get_user_orders(db:Session, user_id:int) -> list[Order]:
 	stmt = select(Order).where(Order.user_id == user_id).order_by(Order.created_at.desc())
 	return db.execute(stmt).scalars().all()
+
+
+def get_order_by_id(db:Session, order_id:int) -> Order|None:
+	return db.get(Order, order_id)
+
+def get_all_orders(db:Session, status:str|None = None) -> list[Order]:
+	stmt = select(Order).order_by(Order.created_at.desc())
+	if status:
+		stmt = stmt.where(Order.status == status)
+	return db.execute(stmt).scalars().all()
+
+def update_order_status(db:Session, order:Order, new_status:str) -> Order:
+	order.status = new_status
+	db.add(order)
+	db.commit()
+	db.refresh(order)
+	return order
