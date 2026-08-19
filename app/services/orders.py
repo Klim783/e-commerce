@@ -1,5 +1,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+
+from app.models import OrderStatus
 from app.repository import cart as cart_repo
 from app.repository import orders as order_repo
 
@@ -43,12 +45,21 @@ def list_orders(db:Session, user_id:int):
 	return order_repo.get_user_orders(db, user_id)
 
 
-ALLOWED_TRANSITIONS = {
-	"PENDING" : {"PAID", "CANCELLED"},
-	"PAID": {"SHIPPED","CANCELLED"},
-	"SHIPPED": {"DELIVERED"},
-	"DELIVERED": set(),
-	"CANCELLED" : set(),
+# ALLOWED_TRANSITIONS = {
+# 	"PENDING" : {"PAID", "CANCELLED"},
+# 	"PAID": {"SHIPPED","CANCELLED"},
+# 	"SHIPPED": {"DELIVERED"},
+# 	"DELIVERED": set(),
+# 	"CANCELLED" : set(),
+# }
+
+
+ALLOWED_TRANSITIONS: dict[OrderStatus, set[OrderStatus]] = {
+    OrderStatus.PENDING: {OrderStatus.PAID, OrderStatus.CANCELLED},
+    OrderStatus.PAID: {OrderStatus.SHIPPED, OrderStatus.CANCELLED},
+    OrderStatus.SHIPPED: {OrderStatus.DELIVERED},
+    OrderStatus.DELIVERED: set(),
+    OrderStatus.CANCELLED: set(),
 }
 
 def admin_list_orders(db:Session, status:str|None = None):
