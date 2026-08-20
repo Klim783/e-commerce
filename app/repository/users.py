@@ -8,12 +8,13 @@ def get_user_by_id(db:Session, user_id:int) ->User|None:
 	return db.query(User).filter(User.id == user_id).first()
 
 
-def create_user(db:Session, email:str, hashed_password:str, full_name:str) -> User:
-	user = User(email = email, hashed_password = hashed_password, full_name = full_name)
-	db.add(user)
-	db.flush()
+def create_user(db: Session, email: str, hashed_password: str, full_name: str) -> User:
+    user = User(email=email, hashed_password=hashed_password, full_name=full_name)
+    db.add(user)
+    db.flush()  # assign user.id so the cart can reference it
 
-	cart = Cart(user_id = user.id)
-	db.add(cart)
-	db.refresh(user)
-	return user
+    cart = Cart(user_id=user.id)
+    db.add(cart)
+    db.commit()
+    db.refresh(user)
+    return user
