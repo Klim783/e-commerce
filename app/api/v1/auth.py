@@ -19,6 +19,6 @@ def register(payload:RegisterRequest, db:Session = Depends(get_db)):
 def login(payload:LoginRequest, db:Session = Depends(get_db)):
 	return users_service.login(db, payload.email, payload.password)
 
-@router.post('/auth/me', response_model=UserResponse)
+@router.get('/auth/me', response_model=UserResponse)
 def get_me(current_user:User = Depends(get_current_user)):
 	return UserResponse.model_validate(current_user)

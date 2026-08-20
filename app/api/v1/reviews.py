@@ -13,7 +13,7 @@ def create_review(
 	db:Session = Depends(get_db),
 	user = Depends(get_current_user),
 ):
-	return review_service.create_review(db, user.id, payload.product_id, payload.rating, payload.commet)
+	return review_service.create_review(db, user.id, payload.product_id, payload.rating, payload.comment)
 
 @router.post("/{review_id}", response_model=ReviewResponse)
 def update_review(
