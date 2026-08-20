@@ -8,12 +8,18 @@ from app.api.v1.cart import router as cart_router
 from app.api.v1.orders import router as orders_router
 from app.api.v1.reviews import router as reviews_router
 from app.api.v1.wishlist import router as wishlist_router
+from app import models
+from fastapi.staticfiles import StaticFiles
+from fastapi.staticfiles import StaticFiles
+from app.database import engine, Base
 
 app = FastAPI(title="E-commerce API")
-
+Base.metadata.create_all(bind=engine)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"]
+    allow_origins=["*"],
+    allow_methods = ["*"],
+    allow_headers = ["*"],
 )
 
 app.include_router(auth_router, prefix="/api/v1", tags=["auth"])
@@ -24,7 +30,9 @@ app.include_router(orders_router, prefix="/api/v1", tags=["orders"])
 app.include_router(reviews_router, prefix="/api/v1", tags=["reviews"])
 app.include_router(wishlist_router, prefix="/api/v1", tags=["wishlist"])
 
-
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+app.mount("/media", StaticFiles(directory="media/products"), name="media")
+app.mount("/", StaticFiles(directory="static", html=True), name="static")

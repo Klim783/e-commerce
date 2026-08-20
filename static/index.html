@@ -361,6 +361,13 @@ function money(v) {
   const n = typeof v === 'number' ? v : parseFloat(v || 0);
   return '$' + n.toFixed(2);
 }
+function mediaUrl(path) {
+  if (!path) return '';
+  if (path.startsWith('http')) return path; // уже абсолютный URL (например с loremflickr)
+  const origin = state.apiBase.replace(/\/api\/v1\/?$/, '');
+  return origin + path;
+}
+
 function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -526,6 +533,7 @@ function productCard(p) {
         <span class="cat-label">${escapeHtml(p.category?.name || '')}</span>
         ${stockPill(stock)}
       </div>
+      ${p.image_url ? `<img src="${escapeHtml(mediaUrl(p.image_url))}" alt="${escapeHtml(p.name)}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:2px;margin:4px 0;" loading="lazy" />` : ''}
       <a href="#/product/${p.id}" class="pname">${escapeHtml(p.name)}</a>
       <div class="prating">★ ${(p.average_rating ?? p.avg_rating ?? 0) || '—'} ${p.review_count ? `(${p.review_count})` : ''}</div>
       <div class="price-row">
@@ -607,7 +615,11 @@ async function viewProduct(id) {
       <a href="#/" class="icon-btn" style="margin-bottom:20px;display:inline-block;">← Back to catalog</a>
       <div class="pdp">
         <div>
-          <div class="pdp-image">${escapeHtml((p.name||'?').charAt(0))}</div>
+          <div class="pdp-image">
+ <div class="pdp-image">
+  ${p.image_url ? `<img src="${escapeHtml(mediaUrl(p.image_url))}" alt="${escapeHtml(p.name)}" style="width:100%;height:100%;object-fit:cover;" />` : escapeHtml((p.name||'?').charAt(0))}
+</div>
+</div>
         </div>
         <div>
           <span class="cat-label mono">${escapeHtml(p.category?.name || '')}</span>
